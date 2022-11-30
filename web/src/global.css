@@ -1,0 +1,18 @@
+@font-face {
+  font-family: Silkscreen;
+  src: url("Silkscreen-Regular.ttf");
+}
+@font-face {
+  font-family: Silkscreen;
+  font-weight: bold;
+  src: url("Silkscreen-Bold.ttf");
+}
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  height: 100%;
+  position: relative;
+}

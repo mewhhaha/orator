@@ -1,0 +1,13 @@
+{
+  "name": "wasm-init",
+  "version": "1.0.0",
+  "description": "",
+  "type": "module",
+  "module": "./init.js",
+  "types": "./init.d.ts",
+  "scripts": {},
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {}
+}

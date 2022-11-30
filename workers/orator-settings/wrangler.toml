@@ -1,0 +1,13 @@
+compatibility_date = "2022-10-15"
+name = "orator-settings"
+workers_dev = false
+
+[durable_objects]
+bindings = [{name = "SETTINGS_DO", class_name = "OratorSettings"}]
+
+[[migrations]]
+new_classes = ["OratorSettings"]
+tag = "v1"
+
+[build.upload]
+format = "modules"

@@ -1,0 +1,16 @@
+{
+  "name": "ocktopod.com",
+  "description": "root",
+  "packageManager": "pnpm@7.17.0",
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "private": true,
+  "scripts": {
+    "build": "turbo run build --no-daemon",
+    "dev": "turbo run dev --no-daemon"
+  },
+  "devDependencies": {
+    "turbo": "^1.6.3"
+  }
+}

@@ -1,0 +1,17 @@
+compatibility_date = "2022-10-15"
+name = "orator-timeline"
+workers_dev = false
+
+[durable_objects]
+bindings = [{name = "TIMELINE_DO", class_name = "OratorTimeline"}]
+
+[[migrations]]
+new_classes = ["OratorTimeline"]
+tag = "v1"
+
+[build.upload]
+format = "modules"
+
+kv_namespaces = [
+  {binding = "TIMELINE_KV", id = "3d0353e7e0d64e6fb6a001dfcd54cc7b", preview_id = "3d0353e7e0d64e6fb6a001dfcd54cc7b"},
+]

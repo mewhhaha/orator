@@ -1,0 +1,21 @@
+compatibility_date = "2022-07-25"
+name = "orator"
+
+[durable_objects]
+bindings = [
+  {name = "SETTINGS_DO", class_name = "OratorSettings", script_name = "orator-settings"},
+  {name = "POST_DO", class_name = "OratorPost", script_name = "orator-post"},
+  {name = "TIMELINE_DO", class_name = "OratorTimeline", script_name = "orator-timeline"},
+  {name = "CROWD_DO", class_name = "OratorCrowd", script_name = "orator-crowd"},
+]
+
+[miniflare.mounts]
+orator-crowd = "../workers/orator-crowd"
+orator-post = "../workers/orator-post"
+orator-settings = "../workers/orator-settings"
+orator-timeline = "../workers/orator-timeline"
+
+kv_namespaces = [
+  {binding = "FEED_KV", id = "fbb8dd3f1c91435b9598f7ed782a2a36", preview_id = "fbb8dd3f1c91435b9598f7ed782a2a36"},
+  {binding = "TIMELINE_KV", id = "3d0353e7e0d64e6fb6a001dfcd54cc7b", preview_id = "3d0353e7e0d64e6fb6a001dfcd54cc7b"},
+]

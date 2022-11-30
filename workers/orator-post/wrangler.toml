@@ -1,0 +1,17 @@
+compatibility_date = "2022-10-15"
+name = "orator-post"
+workers_dev = false
+
+[durable_objects]
+bindings = [{name = "POST_DO", class_name = "OratorPost"}]
+
+[[migrations]]
+new_classes = ["OratorPost"]
+tag = "v1"
+
+[build.upload]
+format = "modules"
+
+kv_namespaces = [
+  {binding = "POST_KV", id = "fbb8dd3f1c91435b9598f7ed782a2a36", preview_id = "fbb8dd3f1c91435b9598f7ed782a2a36"},
+]
