@@ -1,4 +1,9 @@
 compatibility_date = "2022-07-25"
+kv_namespaces = [
+  {binding = "FEED_KV", id = "fbb8dd3f1c91435b9598f7ed782a2a36", preview_id = "fbb8dd3f1c91435b9598f7ed782a2a36"},
+  {binding = "TIMELINE_KV", id = "3d0353e7e0d64e6fb6a001dfcd54cc7b", preview_id = "3d0353e7e0d64e6fb6a001dfcd54cc7b"},
+  {binding = "POST_KV", id = "fbb8dd3f1c91435b9598f7ed782a2a36", preview_id = "fbb8dd3f1c91435b9598f7ed782a2a36"},
+]
 name = "orator"
 
 [durable_objects]
@@ -14,8 +19,3 @@ orator-crowd = "../workers/orator-crowd"
 orator-post = "../workers/orator-post"
 orator-settings = "../workers/orator-settings"
 orator-timeline = "../workers/orator-timeline"
-
-kv_namespaces = [
-  {binding = "FEED_KV", id = "fbb8dd3f1c91435b9598f7ed782a2a36", preview_id = "fbb8dd3f1c91435b9598f7ed782a2a36"},
-  {binding = "TIMELINE_KV", id = "3d0353e7e0d64e6fb6a001dfcd54cc7b", preview_id = "3d0353e7e0d64e6fb6a001dfcd54cc7b"},
-]

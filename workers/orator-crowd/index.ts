@@ -1,4 +1,4 @@
-import { CallableDurableObject, respond, Serialized } from "doit";
+import { CallableDurableObject, error, respond, Serialized } from "doit";
 import { Post } from "wtypes";
 import { invertDate } from "wutils";
 
@@ -19,6 +19,10 @@ export class OratorCrowd extends CallableDurableObject<Env> {
 
   deliver(_: Request, post: Serialized<Post>) {
     const invertedDate = invertDate(post.createdAt);
+
+    if (invertedDate === undefined) {
+      return error("invalid post date", 422);
+    }
 
     this.state.storage
       .list<boolean>({ allowConcurrency: true })

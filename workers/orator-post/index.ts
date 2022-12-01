@@ -7,7 +7,7 @@ type Env = {
 
 export class OratorPost extends CallableDurableObject<Env> {
   async write(_: Request, author: string, text: string) {
-    if (this.state.storage.get("post") !== undefined) {
+    if ((await this.state.storage.get("post")) !== undefined) {
       return error("Conflict", 409);
     }
 

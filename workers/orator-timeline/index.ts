@@ -1,4 +1,4 @@
-import { CallableDurableObject, respond, Serialized } from "doit";
+import { CallableDurableObject, error, respond, Serialized } from "doit";
 import { invertDate } from "wutils";
 import { Post } from "wtypes";
 
@@ -9,6 +9,10 @@ type Env = {
 export class OratorTimeline extends CallableDurableObject<Env> {
   async add(_: Request, post: Serialized<Post>) {
     const invertedDate = invertDate(post.createdAt);
+    if (invertedDate === undefined) {
+      return error("invalid post date", 422);
+    }
+
     this.env.TIMELINE_KV.put(
       `${post.author}#${invertedDate}#${post.id}`,
       post.id,

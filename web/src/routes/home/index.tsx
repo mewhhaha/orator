@@ -13,6 +13,7 @@ export const onGet = async ({ platform }: HandlerArgs) => {
   const posts = items.keys
     .map((k) => k.metadata)
     .filter((p): p is Post => p !== undefined);
+
   return { timeline: posts, author: fakeAuthor };
 };
 

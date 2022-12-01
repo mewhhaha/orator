@@ -1,4 +1,7 @@
 compatibility_date = "2022-10-15"
+kv_namespaces = [
+  {binding = "POST_KV", id = "fbb8dd3f1c91435b9598f7ed782a2a36", preview_id = "fbb8dd3f1c91435b9598f7ed782a2a36"},
+]
 name = "orator-post"
 workers_dev = false
 
@@ -11,7 +14,3 @@ tag = "v1"
 
 [build.upload]
 format = "modules"
-
-kv_namespaces = [
-  {binding = "POST_KV", id = "fbb8dd3f1c91435b9598f7ed782a2a36", preview_id = "fbb8dd3f1c91435b9598f7ed782a2a36"},
-]
