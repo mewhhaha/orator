@@ -2,7 +2,19 @@ Don't use this if you expect any stability. It's a super hacky way of running ea
 
 IMPORTANT:
 
-Need `NODE_OPTIONS=--experimental-vm-modules` before the vite dev command
+Need `NODE_OPTIONS=--experimental-vm-modules` before the `vite dev` command
+
+Use it like
+
+```json
+...
+"scripts": {
+  ...
+  "dev": "NODE_OPTIONS=--experimental-vm-modules vite --mode ssr",
+  ...
+},
+...
+```
 
 Use it like
 
