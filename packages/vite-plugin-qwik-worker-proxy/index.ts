@@ -123,6 +123,10 @@ type QwikWorkerProxyPluginOptions = {
 };
 
 const options = {
+  kvPersist: true,
+  r2Persist: true,
+  durableObjectsPersist: true,
+  cachePersist: true,
   wranglerConfigPath: true,
   modules: true,
   log: new Log(LogLevel.INFO),
@@ -144,13 +148,7 @@ export const qwikWorkerProxy = ({
       mf = new Miniflare({
         script,
         port,
-        kvPersist: true,
-        r2Persist: true,
-        durableObjectsPersist: true,
-        cachePersist: true,
-        wranglerConfigPath: true,
-        modules: true,
-        log: new Log(LogLevel.INFO),
+        ...options,
       });
 
       server = await mf.startServer();
@@ -185,7 +183,7 @@ export const qwikWorkerProxy = ({
         routes[match[1]] = endpoints;
 
         const script = await buildWorker();
-        mf.setOptions({ port, script, ...options });
+        await mf.setOptions({ port, script, ...options });
 
         if (endpoints.length === 0) return;
 
