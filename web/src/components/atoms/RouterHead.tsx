@@ -21,7 +21,7 @@ export const RouterHead = component$(() => {
 
       <link
         rel="stylesheet"
-        href="https://rsms.me/inter/inter.css&amp;display=swap"
+        href="https://rsms.me/inter/inter.css?display=swap"
       ></link>
 
       <link

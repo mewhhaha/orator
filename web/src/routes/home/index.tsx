@@ -1,12 +1,14 @@
-import { component$, Resource, Slot } from "@builder.io/qwik";
-import { useEndpoint } from "@builder.io/qwik-city";
+import { component$, Slot } from "@builder.io/qwik";
+import { action$, Form, loader$ } from "@builder.io/qwik-city";
 import { JSX } from "@builder.io/qwik/jsx-runtime";
+import { client, call } from "doit";
 import { Post } from "wtypes";
-import { Form } from "~/components/atoms";
-import { EndpointData, HandlerArgs } from "~/helpers";
-const fakeAuthor = "me";
+import { HandlerParams } from "~/helpers";
 
-export const onGet = async ({ platform }: HandlerArgs) => {
+export const loader = loader$(async ({ platform }: HandlerParams) => {
+  const fakeAuthor =
+    "https://pbs.twimg.com/profile_images/1578797224368250880/Gfug3lp7_400x400.jpg";
+
   const items = await platform.TIMELINE_KV.list<Post>({
     prefix: `${fakeAuthor}#`,
   });
@@ -15,52 +17,72 @@ export const onGet = async ({ platform }: HandlerArgs) => {
     .filter((p): p is Post => p !== undefined);
 
   return { timeline: posts, author: fakeAuthor };
-};
+});
+
+export const action = action$(
+  // @ts-ignore Types aren't good for action$ yet
+  async (form, { request, platform, error }: HandlerParams) => {
+    const fakeAuthor =
+      "https://pbs.twimg.com/profile_images/1578797224368250880/Gfug3lp7_400x400.jpg";
+
+    const text = form.get("text")?.toString();
+    if (!text) {
+      throw error(422, "Missing text");
+    }
+
+    const id = platform.POST_DO.newUniqueId();
+    const postDO = client(request, platform.POST_DO, id);
+    const crowdDO = client(request, platform.CROWD_DO, fakeAuthor);
+    const timelineDO = client(request, platform.TIMELINE_DO, fakeAuthor);
+    const post = await call(postDO, "write", fakeAuthor, text);
+    await Promise.all([
+      call(crowdDO, "deliver", post),
+      call(timelineDO, "add", post),
+    ]);
+
+    return post;
+  }
+);
 
 export default component$(() => {
-  const data = useEndpoint<EndpointData<typeof onGet>>();
+  const q = loader.use();
 
   return (
-    <Resource
-      value={data}
-      onResolved={({ timeline, author }) => {
-        return (
-          <section>
-            <div class="sticky top-0 mb-4 h-12 px-4 py-2 text-xl font-bold backdrop-blur-md">
-              Home
-            </div>
-            <Create
-              author={author}
-              class="border-gray border-b border-gray-700 px-8 pb-6"
-            />
-            <List>
-              {timeline.map(({ text }) => {
-                return (
-                  <li class="grid grid-cols-[4rem,auto] grid-rows-2 gap-2 px-8">
-                    <div>
-                      <Avatar src="" />
-                    </div>
-                    <div>{text}</div>
-                  </li>
-                );
-              })}
-            </List>
-          </section>
-        );
-      }}
-    />
+    <section>
+      <div class="sticky top-0 mb-4 h-12 px-4 py-2 text-xl font-bold backdrop-blur-md">
+        Home
+      </div>
+      <Create
+        author={q.value.author}
+        class="border-gray border-b border-gray-700 px-4 pb-6"
+      />
+      <List>
+        {q.value.timeline.map(({ text }) => {
+          return (
+            <li class="grid grid-cols-[4rem,auto] grid-rows-2 gap-2 px-4">
+              <div>
+                <Avatar src="" />
+              </div>
+              <div>{text}</div>
+            </li>
+          );
+        })}
+      </List>
+    </section>
   );
 });
 
 type CreateProps = { author: string } & JSX.IntrinsicElements["div"];
 
 export const Create = component$(({ author, ...props }: CreateProps) => {
+  const createPost = action.use();
+
   return (
     <div {...props}>
       <Form
-        class="grid grid-cols-[4rem,auto] grid-rows-2 gap-2"
+        class="grid grid-cols-[3rem,auto] grid-rows-[1fr,3rem] gap-2"
         method="post"
-        action="/home/new"
+        action={createPost}
       >
         <div>
           <Avatar src={author} />
@@ -75,8 +97,11 @@ export const Create = component$(({ author, ...props }: CreateProps) => {
         <div class="col-start-2 flex items-start justify-between pl-4">
           <div>attachments</div>
           <div>
-            <button type="submit" class="rounded-full bg-blue-400 px-4 py-2">
-              orate
+            <button
+              type="submit"
+              class="rounded-full bg-sky-500 px-4 py-2 font-medium"
+            >
+              Orate
             </button>
           </div>
         </div>

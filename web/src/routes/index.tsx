@@ -1,8 +1,11 @@
 import { component$ } from "@builder.io/qwik";
-import { HandlerArgs } from "~/helpers";
+import { loader$ } from "@builder.io/qwik-city";
 
-export const onGet = ({ response }: HandlerArgs) => {
-  throw response.redirect("/home", 302);
-};
+export const loader = loader$(({ redirect }) => {
+  throw redirect(302, "/home");
+});
 
-export default component$(() => <></>);
+export default component$(() => {
+  loader.use();
+  return <></>;
+});

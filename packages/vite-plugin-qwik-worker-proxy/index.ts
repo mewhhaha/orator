@@ -5,16 +5,19 @@ import fs from "fs";
 import { fileURLToPath } from "url";
 import path from "path";
 
+const regexLoader = /export const (\w+) = loader\$/g;
+const regexAction = /export const (\w+) = action\$/g;
+
 const dir = path.dirname(fileURLToPath(import.meta.url));
 
 // TODO: Bundle and inline these?
-const handlerModule = fs.readFileSync(`${dir}/handler.js`, "utf-8");
-const wrapperModule = fs.readFileSync(`${dir}/wrapper.js`, "utf-8");
+const proxyModule = fs.readFileSync(`${dir}/proxy.js`, "utf-8");
+const cfModule = fs.readFileSync(`${dir}/cf.js`, "utf-8");
 
 let server: { close: () => void };
 let mf: Miniflare;
 
-const routes: Record<string, string[]> = {};
+const routes: Record<string, { actions: string[]; loaders: string[] }> = {};
 
 const restRegex = /\[\.\.\.(.+)\]/;
 const paramRegex = /\[(.+)\]/;
@@ -22,7 +25,7 @@ const paramRegex = /\[(.+)\]/;
 const stripFileSemantics = (r: string) =>
   r
     .slice("src/routes".length)
-    .replace("/index.tsx", "")
+    .replace("index.tsx", "page")
     .replace("layout.tsx", "layout");
 
 const makeIttyPath = (r: string) => {
@@ -41,31 +44,41 @@ const makeRestParam = (r: string) => {
 };
 
 const buildWorker = async () => {
-  const entries = Object.entries(routes)
-    .sort((a, b) => (a[0] > b[0] ? 1 : -1))
-    .filter(([, fs]) => fs.length > 0);
-
-  const method = (f: string) => f.slice(2).toLowerCase();
+  const entries = Object.entries(routes).filter(
+    ([, fs]) => fs.actions.length > 0 || fs.loaders.length > 0
+  );
 
   const imports = entries
-    .map(([key, fs], i) => {
-      return `import { ${fs
-        .map((f) => `${f} as ${f}${i}`)
-        .join()} } from "./${key}";`;
+    .map(([key, { actions, loaders }], i) => {
+      const loaderImports = loaders.map((f) => `${f} as ${f}${i}`);
+
+      const actionImports = actions.map((f) => `${f} as ${f}${i}`);
+
+      return `import { ${[
+        ...loaderImports,
+        ...actionImports,
+      ].join()} } from "./${key}";`;
     })
     .join("\n");
 
   const endpoints = entries
-    .flatMap(([key, fs], i) => fs.map((f) => [key, f, i] as const))
-    .map(([key, f, i]) => {
+    .flatMap(([key, fs], i) => {
+      const ls = fs.loaders.map((f) => [key, f, i, "loader"] as const);
+      const as = fs.actions.map((f) => [key, f, i, "action"] as const);
+
+      return [...ls, ...as];
+    })
+    .map(([key, f, i, t]) => {
       const path = makeIttyPath(key);
-      return `router.${method(
-        f
-      )}("${path}", wrapper(${f}${i}, "${path}"${makeRestParam(key)}));`;
+      const wrapper = t === "loader" ? "cf_LOADER" : "cf_ACTION";
+      const method = t === "loader" ? "get" : "post";
+      return `router.${method}("${path}/${f}", ${wrapper}(${f}${i}, "${path}"${makeRestParam(
+        key
+      )}));`;
     })
     .join("\n");
 
-  const contents = (imports + "\n" + wrapperModule).replace(
+  const contents = (imports + "\n" + cfModule).replace(
     "/*! REPLACE_ME_WITH_ENDPOINTS */",
     endpoints
   );
@@ -74,6 +87,7 @@ const buildWorker = async () => {
     stdin: {
       contents,
       loader: "ts",
+
       resolveDir: process.cwd(),
     },
     plugins: [
@@ -85,7 +99,9 @@ const buildWorker = async () => {
             const contents = source
               .replace("process.env.NODE_ENV", '"production"')
               .replace("export default component$", "/* @__PURE__ */ ")
-              .replace(/export const .* component\$/g, "/* @__PURE__ */ ");
+              .replace(/export const .* component\$/g, "/* @__PURE__ */ ")
+              .replace("loader$(", "(")
+              .replace("action$(", "(");
 
             return {
               contents,
@@ -160,7 +176,7 @@ export const qwikWorkerProxy = ({
     },
     load(id) {
       if (id === resolvedVirtualModuleId) {
-        return handlerModule;
+        return proxyModule;
       }
     },
     configResolved(resolvedConfig) {
@@ -172,25 +188,35 @@ export const qwikWorkerProxy = ({
       const match = id.match(routeFileRegex);
 
       if (match !== null) {
-        const endpoints = [
-          "onPost",
-          "onGet",
-          "onPut",
-          "onDelete",
-          "onPatch",
-        ].filter((f) => code.includes(f));
+        const loaders = [...code.matchAll(regexLoader)].map((m) => m[1]);
+        const actions = [...code.matchAll(regexAction)].map((m) => m[1]);
 
-        routes[match[1]] = endpoints;
+        routes[match[1]] = {
+          loaders,
+          actions,
+        };
 
         const script = await buildWorker();
         await mf.setOptions({ port, script, ...options });
 
-        if (endpoints.length === 0) return;
+        const imports = [];
+        if (loaders.length > 0) imports.push("proxy_LOADER");
+        if (actions.length > 0) imports.push("proxy_ACTION");
 
-        const proxyImport = 'import { proxy_CF } from "virtual:proxy";\n';
+        if (imports.length === 0) return;
 
-        const proxied = endpoints.reduce((c, f) => {
-          return replaceWithProxy(c, f, stripFileSemantics(match[1]), port);
+        const proxyImport = `import { ${imports.join()} } from "virtual:proxy";\n`;
+
+        const as = actions.map((a) => [a, "action"] as const);
+        const ls = loaders.map((l) => [l, "loader"] as const);
+
+        const proxied = [...as, ...ls].reduce((c, [l, t]) => {
+          return replaceWithProxy(
+            c,
+            `${stripFileSemantics(match[1])}/${l}`,
+            port,
+            t
+          );
         }, proxyImport + code);
 
         return { code: proxied };
@@ -218,18 +244,25 @@ export const qwikWorkerProxy = ({
  */
 const replaceWithProxy = (
   code: string,
-  f: string,
   path: string,
-  port: number
+  port: number,
+  type: "loader" | "action"
 ) => {
   const lines = code.split("\n");
-  const start = lines.findIndex((line) => line.startsWith(`export const ${f}`));
+  const start = lines.findIndex((line) =>
+    line.match(type === "loader" ? regexLoader : regexAction)
+  );
+
   const end = lines.findIndex((line, i) => {
     if (i <= start) return false;
-    return line === "};";
+    return line === "});" || line === ");";
   });
 
-  lines[start] = `export const ${f} = proxy_CF("${path}", ${port});`;
+  const proxy = type === "loader" ? "proxy_LOADER" : "proxy_ACTION";
+
+  lines[
+    start
+  ] = `export const ${type} = ${type}$(${proxy}("${path}", ${port}));`;
 
   return [...lines.slice(0, start + 1), ...lines.slice(end + 1)].join("\n");
 };

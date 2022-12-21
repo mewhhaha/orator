@@ -1,9 +1,9 @@
-import { RequestEvent } from "@builder.io/qwik-city";
 import { DurableObjectNamespaceIs } from "doit";
 import { OratorSettings } from "orator-settings";
 import { OratorPost } from "orator-post";
 import { OratorTimeline } from "orator-timeline";
 import { OratorCrowd } from "orator-crowd";
+import { loader$ } from "@builder.io/qwik-city";
 
 export type Platform = {
   GAME_BUCKET: R2Bucket;
@@ -16,10 +16,6 @@ export type Platform = {
   POST_KV: KVNamespace;
 };
 
-export type HandlerArgs = Omit<RequestEvent<Platform>, "request"> & {
-  request: Request;
-};
-
 export type EndpointData<T extends (...args: any) => any> = T extends (
   ...args: any
 ) => infer V
@@ -27,3 +23,7 @@ export type EndpointData<T extends (...args: any) => any> = T extends (
     ? W
     : V
   : never;
+
+export type HandlerParams = Parameters<
+  Parameters<typeof loader$<Platform, any>>[0]
+>[0];

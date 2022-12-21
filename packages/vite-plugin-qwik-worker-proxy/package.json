@@ -12,28 +12,29 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "run-p \"build:**\"",
-    "build:types": "tsc --project ./tsconfig.json",
-    "build:handler": "esbuild handler.ts --outfile=dist/handler.js --bundle --format=esm",
+    "build:types": "tsc --project ./tsconfig.build.json",
+    "build:handler": "esbuild proxy.ts --outfile=dist/proxy.js --bundle --format=esm",
     "build:index": "esbuild index.ts --outfile=dist/index.js --bundle --format=esm --platform=node --external:miniflare --external:esbuild",
-    "build:wrapper": "esbuild wrapper.ts --outfile=dist/wrapper.js --bundle --format=esm --legal-comments=inline"
+    "build:cf": "esbuild cf.ts --outfile=dist/cf.js --bundle --format=esm --legal-comments=inline"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "@builder.io/qwik-city": "0.0.128",
+    "@builder.io/qwik-city": "0.1.0-beta5",
     "@cloudflare/workers-types": "^4.20221111.1",
     "@types/ioredis": "^4.0.0",
+    "@types/node": "^18.11.17",
     "@types/ws": "^8.5.3",
-    "esbuild": "^0.16.4",
+    "esbuild": "^0.16.10",
     "ioredis": "^4.0.0",
-    "itty-router": "^2.6.6",
+    "itty-router": "^3.0.8",
     "miniflare": "^2.11.0",
-    "node-fetch": "3.3.0",
     "npm-run-all": "^4.1.5",
     "qwik": "^1.0.57",
     "typescript": "4.9.4",
-    "vite": "4.0.0"
+    "undici": "^5.14.0",
+    "vite": "4.0.2"
   },
   "peerDependencies": {
     "esbuild": "^0.15.12",

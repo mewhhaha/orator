@@ -100,7 +100,7 @@ export type External<A extends Record<string, any>> = Extract<
 >;
 
 export type Client<ClassDO extends Record<string, any>> = {
-  request: Request;
+  request: { url: string; headers: Headers };
   stub: DurableObjectStub;
 } & { __type?: ClassDO & never };
 
@@ -114,7 +114,7 @@ export type Client<ClassDO extends Record<string, any>> = {
  * ```
  */
 export const client = <ClassDO extends CallableDurableObject<any>>(
-  request: Request,
+  request: { url: string; headers: Headers },
   ns: DurableObjectNamespaceIs<ClassDO>,
   name: string | DurableObjectId
 ): Client<ClassDO> => {
