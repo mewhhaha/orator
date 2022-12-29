@@ -1,29 +1,16 @@
 import { action$, loader$ } from "@builder.io/qwik-city";
-import {
-  fetch as undiciFetch,
-  Headers,
-  Response as UnidiciResponse,
-} from "undici";
+import { fetch as undiciFetch } from "undici";
+import type { Response, Headers as UndiciHeaders } from "undici";
 
 export const proxy_LOADER =
   (t: string, port: string): Parameters<typeof loader$>[0] =>
   async (args) => {
-    const request = args.request;
-    const { search, hash } = new URL(request.url);
-
-    const path = insertParams(t, args.params);
-
-    const localUrl = new URL(`http://localhost:${port}${path}${search}${hash}`);
-
-    request.headers.delete("connection");
+    const localUrl = filledRequestUrl(args.request.url, args.params, t, port);
+    const localHeaders = strippedHeaders(args.request.headers);
 
     const response = await (fetch as unknown as typeof undiciFetch)(localUrl, {
-      method: request.method,
-      headers: request.headers,
-      body:
-        request.headers.get("content-type") !== null
-          ? await request.text()
-          : undefined,
+      method: args.request.method,
+      headers: localHeaders,
     });
 
     const redirect = response.headers.get("location");
@@ -33,45 +20,52 @@ export const proxy_LOADER =
 
     args.status(response.status);
 
-    writeHeaders(args.headers, response.headers, [
-      "content-type",
-      "date",
-      "etag",
-      "connection",
-      "keep-alive",
-      "set-cookie",
-    ]);
+    writeHeaders(args.headers, response.headers);
 
-    const contentType = args.headers.get("content-type");
-
-    const body = await readResponseBody(response);
-    if (body === null) return null;
-
-    if (contentType?.includes("application/json")) {
-      return JSON.parse(body.toString());
-    }
-
-    if (contentType?.includes("text")) {
-      return body.toString();
-    }
-
-    return body;
+    return getResponseContent(response, args.headers.get("content-type"));
   };
 
-const writeHeaders = (target: Headers, from: Headers, include: string[]) => {
-  from.forEach((value, key) => {
-    if (include.includes(key.toLowerCase())) target.set(key, value);
-  });
-};
+export const proxy_ACTION =
+  (t: string, port: string): Parameters<typeof action$>[0] =>
+  async (form, args) => {
+    const localUrl = filledRequestUrl(args.request.url, args.params, t, port);
+    const localHeaders = strippedHeaders(args.request.headers);
 
-const readResponseBody = async (response: UnidiciResponse) => {
-  if (response.bodyUsed) return null;
-  if (response.body === null) return null;
-  const buffers = [];
-  for await (const chunk of response.body) {
-    buffers.push(typeof chunk === "string" ? Buffer.from(chunk) : chunk);
-  }
-  return Buffer.concat(buffers);
+    const f = new FormData();
+    form.forEach((v, k) => {
+      f.append(k, v);
+    });
+
+    const response = await (fetch as unknown as typeof undiciFetch)(localUrl, {
+      method: args.method,
+      headers: localHeaders,
+      body: f as any,
+    });
+
+    const redirect = response.headers.get("location");
+    if (redirect) {
+      throw args.redirect(Number.parseInt(await response.text()), redirect);
+    }
+
+    args.status(response.status);
+
+    writeHeaders(args.headers, response.headers);
+
+    return getResponseContent(response, args.headers.get("content-type"));
+  };
+
+const VALID_HEADERS = new Set([
+  "content-type",
+  "date",
+  "etag",
+  "connection",
+  "keep-alive",
+  "set-cookie",
+]);
+const writeHeaders = (target: UndiciHeaders, from: UndiciHeaders) => {
+  from.forEach((value, key) => {
+    if (VALID_HEADERS.has(key.toLowerCase())) target.set(key, value);
+  });
 };
 
 const insertParams = (path: string, params: Record<string, string>) => {
@@ -88,59 +82,44 @@ const insertParams = (path: string, params: Record<string, string>) => {
     .join("/");
 };
 
-export const proxy_ACTION =
-  (t: string, port: string): Parameters<typeof action$>[0] =>
-  async (form, args) => {
-    const request = args.request;
-    const { search, hash } = new URL(request.url);
+const filledRequestUrl = (
+  url: string,
+  params: Record<string, string>,
+  t: string,
+  port: string
+) => {
+  const { search, hash } = new URL(url);
 
-    const path = insertParams(t, args.params);
+  const path = insertParams(t, params);
 
-    const localUrl = new URL(`http://localhost:${port}${path}${search}${hash}`);
+  return new URL(`http://localhost:${port}${path}${search}${hash}`);
+};
 
-    request.headers.delete("connection");
-    request.headers.delete("content-length");
-    request.headers.delete("content-type");
+const strippedHeaders = (headers: UndiciHeaders) => {
+  const stripped = new Headers();
 
-    const f = new FormData();
-    form.forEach((v, k) => {
-      f.append(k, v);
-    });
+  headers.forEach((v, k) => {
+    stripped.append(k, v);
+  });
 
-    const response = await (fetch as unknown as typeof undiciFetch)(localUrl, {
-      method: request.method,
-      headers: request.headers,
-      body: f as any,
-    });
+  stripped.delete("connection");
+  stripped.delete("content-length");
+  stripped.delete("content-type");
 
-    const redirect = response.headers.get("location");
-    if (redirect) {
-      throw args.redirect(Number.parseInt(await response.text()), redirect);
-    }
+  return stripped;
+};
 
-    args.status(response.status);
+const getResponseContent = (response: Response, contentType: string | null) => {
+  if (response.bodyUsed) return null;
+  if (response.body === null) return null;
 
-    writeHeaders(args.headers, response.headers, [
-      "content-type",
-      "date",
-      "etag",
-      "connection",
-      "keep-alive",
-      "set-cookie",
-    ]);
+  if (contentType?.includes("application/json")) {
+    return response.json();
+  }
 
-    const contentType = args.headers.get("content-type");
+  if (contentType?.includes("text")) {
+    return response.text();
+  }
 
-    const body = await readResponseBody(response);
-    if (body === null) return null;
-
-    if (contentType?.includes("application/json")) {
-      return JSON.parse(body.toString());
-    }
-
-    if (contentType?.includes("text")) {
-      return body.toString();
-    }
-
-    return body;
-  };
+  return response.arrayBuffer();
+};

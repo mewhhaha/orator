@@ -193,14 +193,21 @@ export const qwikWorkerProxy = ({
 
       const proxied = injectProxies(actions, loaders, code, match[1], port);
 
+      console.log(match[1]);
       routes[match[1]] = {
         loaders,
         actions,
       };
 
       const script = await buildWorker();
-      await mf.setOptions({ port, script, ...options });
 
+      console.log(script);
+      console.log(proxied);
+
+      await mf.setOptions({ port, script, ...options });
+      await mf.dispatchFetch(`http://localhost:${port}`);
+
+      await new Promise((resolve) => setTimeout(resolve, 100));
       return { code: proxied };
     },
     async closeBundle() {

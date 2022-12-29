@@ -20,7 +20,7 @@ importers:
 
   packages/vite-plugin-qwik-worker-proxy:
     specifiers:
-      '@builder.io/qwik-city': 0.1.0-beta5
+      '@builder.io/qwik-city': 0.1.0-beta6
       '@cloudflare/workers-types': ^4.20221111.1
       '@types/ioredis': ^4.0.0
       '@types/node': ^18.11.17
@@ -35,7 +35,7 @@ importers:
       undici: ^5.14.0
       vite: 4.0.2
     devDependencies:
-      '@builder.io/qwik-city': 0.1.0-beta5_@builder.io+qwik@0.16.1
+      '@builder.io/qwik-city': 0.1.0-beta6_@builder.io+qwik@0.16.1
       '@cloudflare/workers-types': 4.20221111.1
       '@types/ioredis': 4.28.10
       '@types/node': 18.11.17
@@ -73,7 +73,7 @@ importers:
   web:
     specifiers:
       '@builder.io/qwik': 0.16.1
-      '@builder.io/qwik-city': 0.1.0-beta5
+      '@builder.io/qwik-city': 0.1.0-beta6
       '@cloudflare/workers-types': ^4.20221111.1
       '@tailwindcss/typography': ^0.5.8
       '@types/eslint': 8.4.10
@@ -107,7 +107,7 @@ importers:
       wtypes: workspace:^1.0.0
     devDependencies:
       '@builder.io/qwik': 0.16.1
-      '@builder.io/qwik-city': 0.1.0-beta5_@builder.io+qwik@0.16.1
+      '@builder.io/qwik-city': 0.1.0-beta6_@builder.io+qwik@0.16.1
       '@cloudflare/workers-types': 4.20221111.1
       '@tailwindcss/typography': 0.5.8_tailwindcss@3.2.4
       '@types/eslint': 8.4.10
@@ -208,8 +208,8 @@ importers:
 
 packages:
 
-  /@builder.io/qwik-city/0.1.0-beta5_@builder.io+qwik@0.16.1:
-    resolution: {integrity: sha512-8jMnQTrn9kT5NR/kciyNFlZ+1qFwWxEQrziCyAFc7Y8FE7rfzwCVjHai1GjpnyZH1Tmge+xx6LCgtUwFqpt6aA==}
+  /@builder.io/qwik-city/0.1.0-beta6_@builder.io+qwik@0.16.1:
+    resolution: {integrity: sha512-RdfMd9bKP9p/aIWtdR16dodBU8eBz78Y4FPUWrcGYfeSFjSB+arNy+M+gKNFpoYNmYgW7qz4J+N17DzVPfgY3A==}
     peerDependencies:
       '@builder.io/qwik': '>=0.16.0'
     dependencies:

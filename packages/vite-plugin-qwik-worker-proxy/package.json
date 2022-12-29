@@ -21,7 +21,7 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "@builder.io/qwik-city": "0.1.0-beta5",
+    "@builder.io/qwik-city": "0.1.0-beta6",
     "@cloudflare/workers-types": "^4.20221111.1",
     "@types/ioredis": "^4.0.0",
     "@types/node": "^18.11.17",
