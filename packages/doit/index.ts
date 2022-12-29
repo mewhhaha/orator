@@ -49,7 +49,7 @@ export const ws = () => {
   };
 };
 
-export type Serialized<T> = T extends string | null | number
+export type Serialized<T> = T extends string | null | number | boolean
   ? T
   : T extends Date
   ? string

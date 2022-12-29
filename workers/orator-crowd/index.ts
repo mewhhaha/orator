@@ -4,16 +4,39 @@ import { invertDate } from "wutils";
 
 type Env = {
   FEED_KV: KVNamespace;
+  CROWD_KV: KVNamespace;
 };
 
 export class OratorCrowd extends CallableDurableObject<Env> {
-  join(_: Request, userId: string) {
-    this.state.storage.put(userId, true, { allowConcurrency: true });
+  constructor(state: DurableObjectState, env: Env) {
+    super(state, env);
+  }
+
+  async following(_: Request, userId: string) {
+    const value = await this.state.storage.get<boolean>(userId);
+    return respond(value === true);
+  }
+
+  async follow(_: Request, crowdId: string, userId: string) {
+    const date = new Date();
+
+    const metadata = { metadata: { updatedAt: date, status: "following" } };
+    this.env.CROWD_KV.put(followers(crowdId, userId), "true", { metadata });
+    this.env.CROWD_KV.put(following(crowdId, userId), "true", { metadata });
+
+    await this.state.storage.put(userId, true, { allowConcurrency: true });
+
     return respond("ok");
   }
 
-  leave(_: Request, userId: string) {
-    this.state.storage.put(userId, false, { allowConcurrency: true });
+  async unfollow(_: Request, crowdId: string, userId: string) {
+    const date = new Date().toISOString();
+
+    const metadata = { metadata: { updatedAt: date, status: "unfollowed" } };
+    this.env.CROWD_KV.put(followers(crowdId, userId), "false", { metadata });
+    this.env.CROWD_KV.put(following(crowdId, userId), "false", { metadata });
+
+    await this.state.storage.put(userId, false, { allowConcurrency: true });
     return respond("ok");
   }
 
@@ -51,3 +74,8 @@ export default {
     return new Response("Not found", { status: 404 });
   },
 };
+
+const followers = (crowdId: string, userId: string) =>
+  `followers#${crowdId}#${userId}`;
+const following = (crowdId: string, userId: string) =>
+  `following#${userId}#${crowdId}`;

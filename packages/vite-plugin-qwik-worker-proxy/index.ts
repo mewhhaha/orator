@@ -99,8 +99,8 @@ const buildWorker = async () => {
               .replace("process.env.NODE_ENV", '"production"')
               .replace("export default component$", "/* @__PURE__ */ ")
               .replace(/export const .* component\$/g, "/* @__PURE__ */ ")
-              .replace("loader$(", "(")
-              .replace("action$(", "(");
+              .replace(/loader\$\(/g, "(")
+              .replace(/action\$\(/g, "(");
 
             return {
               contents,

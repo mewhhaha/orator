@@ -80,7 +80,6 @@ export const Create = component$(({ author, ...props }: CreateProps) => {
     <div {...props}>
       <Form
         class="grid grid-cols-[3rem,auto] grid-rows-[1fr,3rem] gap-2"
-        method="post"
         action={createPost}
       >
         <div>

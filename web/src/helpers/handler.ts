@@ -11,6 +11,7 @@ export type Platform = {
   TIMELINE_KV: KVNamespace;
   SETTINGS_DO: DurableObjectNamespaceIs<OratorSettings>;
   CROWD_DO: DurableObjectNamespaceIs<OratorCrowd>;
+  CROWD_KV: KVNamespace;
   FEED_KV: KVNamespace;
   POST_DO: DurableObjectNamespaceIs<OratorPost>;
   POST_KV: KVNamespace;
