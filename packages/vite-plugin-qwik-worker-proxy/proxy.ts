@@ -1,5 +1,9 @@
 import { action$, loader$ } from "@builder.io/qwik-city";
-import { fetch as undiciFetch, Headers, Response } from "undici";
+import {
+  fetch as undiciFetch,
+  Headers,
+  Response as UnidiciResponse,
+} from "undici";
 
 export const proxy_LOADER =
   (t: string, port: string): Parameters<typeof loader$>[0] =>
@@ -60,7 +64,8 @@ const writeHeaders = (target: Headers, from: Headers, include: string[]) => {
   });
 };
 
-const readResponseBody = async (response: Response) => {
+const readResponseBody = async (response: UnidiciResponse) => {
+  if (response.bodyUsed) return null;
   if (response.body === null) return null;
   const buffers = [];
   for await (const chunk of response.body) {
@@ -94,11 +99,18 @@ export const proxy_ACTION =
     const localUrl = new URL(`http://localhost:${port}${path}${search}${hash}`);
 
     request.headers.delete("connection");
+    request.headers.delete("content-length");
+    request.headers.delete("content-type");
+
+    const f = new FormData();
+    form.forEach((v, k) => {
+      f.append(k, v);
+    });
 
     const response = await (fetch as unknown as typeof undiciFetch)(localUrl, {
       method: request.method,
       headers: request.headers,
-      body: form as any,
+      body: f as any,
     });
 
     const redirect = response.headers.get("location");

@@ -187,7 +187,7 @@ const router = <CustomRouter>Router();
 
 /*! REPLACE_ME_WITH_ENDPOINTS */
 
-router.all("*", () => new Response("Not Found.", { status: 404 }));
+router.all("*", (r) => new Response("Not Found.", { status: 404 }));
 
 export default {
   fetch: router.handle,

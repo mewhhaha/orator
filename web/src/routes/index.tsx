@@ -6,6 +6,5 @@ export const loader = loader$(({ redirect }) => {
 });
 
 export default component$(() => {
-  loader.use();
-  return <></>;
+  throw loader.use();
 });

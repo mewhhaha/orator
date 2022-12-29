@@ -71,8 +71,7 @@ const buildWorker = async () => {
     .map(([key, f, i, t]) => {
       const path = makeIttyPath(key);
       const wrapper = t === "loader" ? "cf_LOADER" : "cf_ACTION";
-      const method = t === "loader" ? "get" : "post";
-      return `router.${method}("${path}/${f}", ${wrapper}(${f}${i}, "${path}"${makeRestParam(
+      return `router.all("${path}/${f}", ${wrapper}(${f}${i}, "${path}"${makeRestParam(
         key
       )}));`;
     })
@@ -129,6 +128,7 @@ const buildWorker = async () => {
     bundle: true,
   });
 
+  console.log(worker.outputFiles?.[0].text);
   return worker.outputFiles?.[0].text;
 };
 
