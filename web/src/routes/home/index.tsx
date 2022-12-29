@@ -3,6 +3,7 @@ import { action$, Form, loader$ } from "@builder.io/qwik-city";
 import { JSX } from "@builder.io/qwik/jsx-runtime";
 import { client, call } from "doit";
 import { Post } from "wtypes";
+import { HeadingPage } from "~/components/atoms/HeadingPage";
 import { HandlerParams } from "~/helpers";
 
 export const loader = loader$(async ({ platform }: HandlerParams) => {
@@ -49,19 +50,17 @@ export default component$(() => {
 
   return (
     <section>
-      <div class="sticky top-0 mb-4 h-12 px-4 py-2 text-xl font-bold backdrop-blur-md">
-        Home
-      </div>
+      <HeadingPage>Home</HeadingPage>
       <Create
         author={q.value.author}
         class="border-gray border-b border-gray-700 px-4 pb-6"
       />
-      <List>
-        {q.value.timeline.map(({ text }) => {
+      <List class="py-4">
+        {q.value.timeline.map(({ text, author }) => {
           return (
-            <li class="grid grid-cols-[4rem,auto] grid-rows-2 gap-2 px-4">
+            <li class="grid grid-cols-[4rem,auto] grid-rows-[1fr,2rem] gap-2 px-4">
               <div>
-                <Avatar src="" />
+                <Avatar src={author} />
               </div>
               <div>{text}</div>
             </li>

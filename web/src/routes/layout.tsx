@@ -19,14 +19,14 @@ export default component$(() => {
       <header class="w-24 flex-none border-r border-gray-700 md:w-32">
         <nav class="flex flex-col items-end gap-4 p-4">
           <NavLink href="/home">
-            <HomeIcon class="h-10 w-10 text-gray-300" />
+            <HomeIcon class="h-8 w-8 text-gray-300" />
           </NavLink>
           <NavLink href={`/${q.value.username}`}>
-            <ProfileIcon class="h-10 w-10 text-gray-300" />
+            <ProfileIcon class="h-8 w-8 text-gray-300" />
           </NavLink>
         </nav>
       </header>
-      <main class="flex-grow">
+      <main class="flex-grow overflow-auto">
         <Slot />
       </main>
       <footer class="w-0 flex-none border-l border-gray-700 sm:w-32">

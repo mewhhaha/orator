@@ -1,11 +1,22 @@
 import { component$ } from "@builder.io/qwik";
+import { loader$ } from "@builder.io/qwik-city";
+import { HeadingPage } from "~/components/atoms/HeadingPage";
+
+export const loader = loader$(({ params }) => {
+  return {
+    username: params.username,
+  };
+});
 
 export default component$(() => {
+  const data = loader.use();
+
   return (
     <section>
-      <div class="sticky top-0 mb-4 h-12 px-4 py-2 text-xl font-bold backdrop-blur-md">
-        User
-      </div>
+      <HeadingPage>{data.value.username}</HeadingPage>
+      <article>
+        <image class="h-48 w-full"></image>
+      </article>
     </section>
   );
 });

@@ -91,7 +91,7 @@ const buildWorker = async () => {
     },
     plugins: [
       {
-        name: "tree-shake-away-chaff",
+        name: "strip-qwik",
         setup: (build) => {
           build.onLoad({ filter: /.*/ }, async ({ path }) => {
             const source = await fs.promises.readFile(path, "utf8");
@@ -128,7 +128,6 @@ const buildWorker = async () => {
     bundle: true,
   });
 
-  console.log(worker.outputFiles?.[0].text);
   return worker.outputFiles?.[0].text;
 };
 
@@ -187,40 +186,22 @@ export const qwikWorkerProxy = ({
       if (config.command !== "serve") return;
       const match = id.match(routeFileRegex);
 
-      if (match !== null) {
-        const loaders = [...code.matchAll(regexLoader)].map((m) => m[1]);
-        const actions = [...code.matchAll(regexAction)].map((m) => m[1]);
+      if (match === null) return;
 
-        routes[match[1]] = {
-          loaders,
-          actions,
-        };
+      const loaders = [...code.matchAll(regexLoader)].map((m) => m[1]);
+      const actions = [...code.matchAll(regexAction)].map((m) => m[1]);
 
-        const script = await buildWorker();
-        await mf.setOptions({ port, script, ...options });
+      const proxied = injectProxies(actions, loaders, code, match[1], port);
 
-        const imports = [];
-        if (loaders.length > 0) imports.push("proxy_LOADER");
-        if (actions.length > 0) imports.push("proxy_ACTION");
+      routes[match[1]] = {
+        loaders,
+        actions,
+      };
 
-        if (imports.length === 0) return;
+      const script = await buildWorker();
+      await mf.setOptions({ port, script, ...options });
 
-        const proxyImport = `import { ${imports.join()} } from "virtual:proxy";\n`;
-
-        const as = actions.map((a) => [a, "action"] as const);
-        const ls = loaders.map((l) => [l, "loader"] as const);
-
-        const proxied = [...as, ...ls].reduce((c, [l, t]) => {
-          return replaceWithProxy(
-            c,
-            `${stripFileSemantics(match[1])}/${l}`,
-            port,
-            t
-          );
-        }, proxyImport + code);
-
-        return { code: proxied };
-      }
+      return { code: proxied };
     },
     async closeBundle() {
       if (config.command !== "serve") return;
@@ -231,38 +212,31 @@ export const qwikWorkerProxy = ({
   };
 };
 
-/**
- * Super naive replacement that replaces a method with this structure for an onGet for example.
- * If it doesn't matches that format, this fails. :shrug:
- * ```tsx
- * export const onGet ....
- * ...
- * ...
- * ...
- * };
- * ```
- */
-const replaceWithProxy = (
+/** The scheme is pretty simple: given `loader$(...)` we push the previous argument by one and replace it with a proxy so it becomes `loader$(proxy_LOADER, ...)`.
+ * The loader$ and action$ functions don't handle the second argument so the normal function ends up in the void. */
+const injectProxies = (
+  actions: string[],
+  loaders: string[],
   code: string,
-  path: string,
-  port: number,
-  type: "loader" | "action"
+  file: string,
+  port: number
 ) => {
-  const lines = code.split("\n");
-  const start = lines.findIndex((line) =>
-    line.match(type === "loader" ? regexLoader : regexAction)
-  );
+  const imports = [];
+  if (loaders.length > 0) imports.push("proxy_LOADER");
+  if (actions.length > 0) imports.push("proxy_ACTION");
 
-  const end = lines.findIndex((line, i) => {
-    if (i <= start) return false;
-    return line === "});" || line === ");";
-  });
+  if (imports.length === 0) return;
 
-  const proxy = type === "loader" ? "proxy_LOADER" : "proxy_ACTION";
+  const proxyImport = `import { ${imports.join()} } from "virtual:proxy";\n`;
 
-  lines[
-    start
-  ] = `export const ${type} = ${type}$(${proxy}("${path}", ${port}));`;
+  const as = actions.map((a) => [a, "action"] as const);
+  const ls = loaders.map((l) => [l, "loader"] as const);
 
-  return [...lines.slice(0, start + 1), ...lines.slice(end + 1)].join("\n");
+  return [...as, ...ls].reduce((c, [l, t]) => {
+    const path = `${stripFileSemantics(file)}/${l}`;
+    return c.replace(
+      new RegExp(`(export const ${l} = ${t}\\$\\()`),
+      `$1proxy_${t.toUpperCase()}("${path}", ${port}), `
+    );
+  }, proxyImport + code);
 };
