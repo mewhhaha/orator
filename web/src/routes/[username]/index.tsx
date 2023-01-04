@@ -1,4 +1,4 @@
-import { component$, useSignal } from "@builder.io/qwik";
+import { component$ } from "@builder.io/qwik";
 import { action$, Form, loader$ } from "@builder.io/qwik-city";
 import { JSX } from "@builder.io/qwik/jsx-runtime";
 import { call, client } from "doit";
