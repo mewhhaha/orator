@@ -1,22 +1,25 @@
 compatibility_date = "2022-07-25"
 kv_namespaces = [
-  { binding = "FEED_KV", id = "fbb8dd3f1c91435b9598f7ed782a2a36", preview_id = "fbb8dd3f1c91435b9598f7ed782a2a36" },
-  { binding = "TIMELINE_KV", id = "3d0353e7e0d64e6fb6a001dfcd54cc7b", preview_id = "3d0353e7e0d64e6fb6a001dfcd54cc7b" },
-  { binding = "POST_KV", id = "fbb8dd3f1c91435b9598f7ed782a2a36", preview_id = "fbb8dd3f1c91435b9598f7ed782a2a36" },
-  { binding = "CROWD_KV", id = "1fd1e643b2f34c75b74a081ee6146fd3", preview_id = "1fd1e643b2f34c75b74a081ee6146fd3" },
+  {binding = "FEED_KV", id = "fbb8dd3f1c91435b9598f7ed782a2a36", preview_id = "fbb8dd3f1c91435b9598f7ed782a2a36"},
+  {binding = "TIMELINE_KV", id = "3d0353e7e0d64e6fb6a001dfcd54cc7b", preview_id = "3d0353e7e0d64e6fb6a001dfcd54cc7b"},
+  {binding = "POST_KV", id = "fbb8dd3f1c91435b9598f7ed782a2a36", preview_id = "fbb8dd3f1c91435b9598f7ed782a2a36"},
+  {binding = "CROWD_KV", id = "1fd1e643b2f34c75b74a081ee6146fd3", preview_id = "1fd1e643b2f34c75b74a081ee6146fd3"},
+  {binding = "USER_KV", id = "9acf44a4c50b4d879149287edce601dc", preview_id = "9acf44a4c50b4d879149287edce601dc"},
 ]
-name = "orator"
+name = "peeper"
 
 [durable_objects]
 bindings = [
-  { name = "SETTINGS_DO", class_name = "OratorSettings", script_name = "orator-settings" },
-  { name = "POST_DO", class_name = "OratorPost", script_name = "orator-post" },
-  { name = "TIMELINE_DO", class_name = "OratorTimeline", script_name = "orator-timeline" },
-  { name = "CROWD_DO", class_name = "OratorCrowd", script_name = "orator-crowd" },
+  {name = "SETTINGS_DO", class_name = "PeeperSettings", script_name = "peeper-settings"},
+  {name = "POST_DO", class_name = "PeeperPost", script_name = "peeper-post"},
+  {name = "TIMELINE_DO", class_name = "PeeperTimeline", script_name = "peeper-timeline"},
+  {name = "CROWD_DO", class_name = "PeeperCrowd", script_name = "peeper-crowd"},
+  {name = "USER_DO", class_name = "PeeperUser", script_name = "peeper-user"},
 ]
 
 [miniflare.mounts]
-orator-crowd = "../workers/orator-crowd"
-orator-post = "../workers/orator-post"
-orator-settings = "../workers/orator-settings"
-orator-timeline = "../workers/orator-timeline"
+peeper-crowd = "../workers/peeper-crowd"
+peeper-post = "../workers/peeper-post"
+peeper-settings = "../workers/peeper-settings"
+peeper-timeline = "../workers/peeper-timeline"
+peeper-user = "../workers/peeper-user"

@@ -43,7 +43,7 @@ export const RouterHead = component$(() => {
       />
       <link rel="manifest" href="/site.webmanifest" />
 
-      <meta property="og:site_name" content="Orator" />
+      <meta property="og:site_name" content="Peeper" />
 
       {head.meta.map((m) => (
         <meta {...m} />

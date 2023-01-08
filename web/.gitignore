@@ -34,8 +34,10 @@ lerna-debug.log*
 *.sw?
 
 # Yarn
-.yarn/*
+.\storage\kv\yarn/*
 !.yarn/releases
 
 # Cloudflare
 functions/**/*.js
+
+.env

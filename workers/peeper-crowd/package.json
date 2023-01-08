@@ -1,5 +1,5 @@
 {
-  "name": "orator-post",
+  "name": "peeper-crowd",
   "description": "worker with durable object for posts",
   "type": "module",
   "module": "./dist/index.mjs",
@@ -16,8 +16,9 @@
     "@cloudflare/workers-types": "^4.20221111.1",
     "@miniflare/tre": "3.0.0-next.2",
     "doit": "workspace:^1.0.0",
-    "esbuild": "^0.16.10",
+    "esbuild": "^0.16.15",
     "wrangler": "^2.4.4",
-    "wtypes": "workspace:^1.0.0"
+    "wtypes": "workspace:^1.0.0",
+    "wutils": "workspace:^1.0.0"
   }
 }

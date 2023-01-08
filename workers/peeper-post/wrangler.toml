@@ -2,14 +2,14 @@ compatibility_date = "2022-10-15"
 kv_namespaces = [
   {binding = "POST_KV", id = "fbb8dd3f1c91435b9598f7ed782a2a36", preview_id = "fbb8dd3f1c91435b9598f7ed782a2a36"},
 ]
-name = "orator-post"
+name = "peeper-post"
 workers_dev = false
 
 [durable_objects]
-bindings = [{name = "POST_DO", class_name = "OratorPost"}]
+bindings = [{name = "POST_DO", class_name = "PeeperPost"}]
 
 [[migrations]]
-new_classes = ["OratorPost"]
+new_classes = ["PeeperPost"]
 tag = "v1"
 
 [build.upload]

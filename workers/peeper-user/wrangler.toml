@@ -1,0 +1,16 @@
+compatibility_date = "2022-10-15"
+kv_namespaces = [
+  {binding = "USER_KV", id = "9acf44a4c50b4d879149287edce601dc", preview_id = "9acf44a4c50b4d879149287edce601dc"},
+]
+name = "peeper-user"
+workers_dev = false
+
+[durable_objects]
+bindings = [{name = "USER_DO", class_name = "PeeperUser"}]
+
+[[migrations]]
+new_classes = ["PeeperUser"]
+tag = "v1"
+
+[build.upload]
+format = "modules"

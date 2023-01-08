@@ -1,40 +1,81 @@
 import { component$, Slot } from "@builder.io/qwik";
 import { DocumentHead, loader$ } from "@builder.io/qwik-city";
 import { JSX } from "@builder.io/qwik/jsx-runtime";
+import { call, client } from "doit";
 import { NavLink } from "~/components/atoms/NavLink";
+import { authenticate, HandlerParams } from "~/helpers";
 
-export const loader = loader$(() => {
-  return { username: "quickcasino" };
+export const loader = loader$(async ({ platform, request }: HandlerParams) => {
+  const auth = await authenticate(platform, request);
+  if (auth.status === "unauthenticated") {
+    return null;
+  }
+
+  const c = client(request, platform.USER_DO, auth.payload.sub);
+  return await call(c, "details");
 });
 
 export const head: DocumentHead = {
-  title: "Orator",
+  title: "Peeper",
 };
 
 export default component$(() => {
-  const q = loader.use();
+  const data = loader.use();
 
   return (
-    <div class="mx-auto flex h-full w-full max-w-5xl">
-      <header class="w-24 flex-none border-r border-gray-700 md:w-32">
-        <nav class="flex flex-col items-end gap-4 p-4">
-          <NavLink href="/home">
-            <HomeIcon class="h-8 w-8 text-gray-300" />
-          </NavLink>
-          <NavLink href={`/${q.value.username}`}>
-            <ProfileIcon class="h-8 w-8 text-gray-300" />
-          </NavLink>
-        </nav>
-      </header>
-      <main class="flex-grow overflow-auto">
-        <Slot />
-      </main>
-      <footer class="w-0 flex-none border-l border-gray-700 sm:w-32">
-        I'm a footer
-      </footer>
+    <div class="absolute inset-0 overflow-auto">
+      <div class="mx-auto flex h-full w-full max-w-5xl">
+        <header class="w-18 sticky top-0 flex-none border-r border-gray-700 lg:w-48">
+          <nav class="flex flex-col gap-4 p-4">
+            {data.value !== null && (
+              <>
+                <MenuLink
+                  href="/home"
+                  icon={<HomeIcon class="h-8 w-8 text-gray-300" />}
+                  title="Home"
+                />
+                <MenuLink
+                  href={`/${data.value.userName}`}
+                  icon={<ProfileIcon class="h-8 w-8 text-gray-300" />}
+                  title="Profile"
+                />
+              </>
+            )}
+          </nav>
+        </header>
+        <main class="flex-grow">
+          <Slot />
+        </main>
+        <footer class="sticky top-0 w-0 flex-none border-l border-gray-700 sm:w-32 lg:w-48">
+          I'm a footer
+        </footer>
+      </div>
     </div>
   );
 });
+
+type MenuLinkProps = {
+  title: string;
+  href: string;
+  icon: JSX.Element;
+};
+
+export const MenuLink = ({ title, href, icon }: MenuLinkProps) => {
+  return (
+    <NavLink
+      class="w-min rounded-full p-2 transition-colors hover:bg-white/10 lg:px-4"
+      href={href}
+    >
+      <div class="lg:grid lg:grid-cols-[3rem,auto]">
+        {icon}
+        <div class="hidden group-aria-[current=page]:font-bold lg:block">
+          {" "}
+          <div class="flex h-full items-center">{title}</div>
+        </div>
+      </div>
+    </NavLink>
+  );
+};
 
 export const HomeIcon = component$((props: JSX.IntrinsicElements["div"]) => {
   return (

@@ -2,7 +2,7 @@ import { CallableDurableObject } from "doit";
 
 type Env = never;
 
-export class OratorSettings extends CallableDurableObject<Env> {}
+export class PeeperSettings extends CallableDurableObject<Env> {}
 
 export default {
   fetch() {

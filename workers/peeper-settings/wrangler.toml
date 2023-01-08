@@ -1,12 +1,12 @@
 compatibility_date = "2022-10-15"
-name = "orator-settings"
+name = "peeper-settings"
 workers_dev = false
 
 [durable_objects]
-bindings = [{name = "SETTINGS_DO", class_name = "OratorSettings"}]
+bindings = [{name = "SETTINGS_DO", class_name = "PeeperSettings"}]
 
 [[migrations]]
-new_classes = ["OratorSettings"]
+new_classes = ["PeeperSettings"]
 tag = "v1"
 
 [build.upload]

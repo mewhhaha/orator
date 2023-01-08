@@ -3,7 +3,9 @@ const dateRegex =
 
 export const invertDate = (date: string) => {
   const match = date.match(dateRegex);
-  if (match?.groups === undefined) return undefined;
+  if (match?.groups === undefined) {
+    throw new Error(`Invalid date: ${date}`);
+  }
 
   const { year, month, day, hour, minute, second } = match.groups;
   const n = year + month + day + hour + minute + second;

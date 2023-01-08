@@ -1,20 +1,27 @@
 import { DurableObjectNamespaceIs } from "doit";
-import { OratorSettings } from "orator-settings";
-import { OratorPost } from "orator-post";
-import { OratorTimeline } from "orator-timeline";
-import { OratorCrowd } from "orator-crowd";
+import { PeeperSettings } from "peeper-settings";
+import { PeeperPost } from "peeper-post";
+import { PeeperTimeline } from "peeper-timeline";
+import { PeeperCrowd } from "peeper-crowd";
+import { PeeperUser } from "peeper-user";
 import { loader$ } from "@builder.io/qwik-city";
 
 export type Platform = {
   GAME_BUCKET: R2Bucket;
-  TIMELINE_DO: DurableObjectNamespaceIs<OratorTimeline>;
+  TIMELINE_DO: DurableObjectNamespaceIs<PeeperTimeline>;
   TIMELINE_KV: KVNamespace;
-  SETTINGS_DO: DurableObjectNamespaceIs<OratorSettings>;
-  CROWD_DO: DurableObjectNamespaceIs<OratorCrowd>;
+  SETTINGS_DO: DurableObjectNamespaceIs<PeeperSettings>;
+  CROWD_DO: DurableObjectNamespaceIs<PeeperCrowd>;
   CROWD_KV: KVNamespace;
   FEED_KV: KVNamespace;
-  POST_DO: DurableObjectNamespaceIs<OratorPost>;
+  POST_DO: DurableObjectNamespaceIs<PeeperPost>;
   POST_KV: KVNamespace;
+  USER_DO: DurableObjectNamespaceIs<PeeperUser>;
+  USER_KV: KVNamespace;
+
+  AUTH_DOMAIN: string;
+  AUTH_AUD: string;
+  AUTH_DEV?: string;
 };
 
 export type EndpointData<T extends (...args: any) => any> = T extends (

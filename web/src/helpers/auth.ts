@@ -1,8 +1,20 @@
-type Authentication =
-  | { status: "authenticated"; username: string }
-  | { status: "not_authenticated" };
+import { createAuthenticator } from "cloudflare-access";
 
-export const authenticate = (request: { headers: Headers }): Authentication => {
-  const c = request.headers.get("cookie");
-  return { status: "authenticated", username: c ?? "fake auth person" };
+export const authenticate = (
+  env: { AUTH_DOMAIN: string; AUTH_AUD: string; AUTH_DEV?: string },
+  request: { headers: Headers; url: string }
+) => {
+  const authenticator = createAuthenticator({
+    domain: env.AUTH_DOMAIN,
+    aud: env.AUTH_AUD,
+  });
+
+  if (env.AUTH_DEV) {
+    return authenticator({
+      ...request,
+      headers: new Headers({ "Cf-Access-Jwt-Assertion": env.AUTH_DEV }),
+    });
+  }
+
+  return authenticator(request);
 };
