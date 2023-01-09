@@ -31,6 +31,12 @@ class RedirectResponse extends Error {
   }
 }
 
+class ErrorResponse extends Error {
+  constructor(public status: number, message?: string) {
+    super(message);
+  }
+}
+
 // THIS IS TAKEN FROM https://github.com/kwhitley/itty-router
 
 export const cf_ACTION =
@@ -73,6 +79,10 @@ export const cf_ACTION =
         return new Response(e.status.toString(), {
           headers: e.headers,
         });
+      }
+
+      if (e instanceof ErrorResponse) {
+        return new Response(e.message, { status: e.status });
       }
 
       return new Response(null, { status: 500 });
@@ -119,6 +129,10 @@ export const cf_LOADER =
         });
       }
 
+      if (e instanceof ErrorResponse) {
+        return new Response(e.message, { status: e.status });
+      }
+
       return new Response(null, { status: 500 });
     }
   };
@@ -153,17 +167,15 @@ const createContext = (
     },
     headers: response.headers,
     redirect: (status: number | undefined = 302, url: string) => {
-      return new RedirectResponse(url, status);
+      throw new RedirectResponse(url, status);
     },
     fail: (_status: number) => {
       throw new Error(
         "fail unimplemented, check vite-plugin-qwik-worker-proxy"
       );
     },
-    error: (_status: number) => {
-      throw new Error(
-        "error unimplemented, check vite-plugin-qwik-worker-proxy"
-      );
+    error: (status: number, message: string) => {
+      throw new ErrorResponse(status, message);
     },
     getData: () => {
       throw new Error(

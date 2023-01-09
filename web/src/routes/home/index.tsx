@@ -13,10 +13,12 @@ export default component$(() => {
   return (
     <section>
       <HeadingPage>Home</HeadingPage>
-      <Create
-        profileImage={data.value.user.profileImage}
-        class="border-gray border-b border-gray-700 px-4 pb-6"
-      />
+      {data.value.user && (
+        <Create
+          profileImage={data.value.user?.profileImage}
+          class="border-gray border-b border-gray-700 px-4 pb-6"
+        />
+      )}
       <ul class="py-4">
         {data.value.feed.map(({ text, profileImage }) => {
           return (
@@ -70,28 +72,26 @@ export const Create = component$(({ profileImage, ...props }: CreateProps) => {
   );
 });
 
-export const loader = loader$(
-  async ({ request, platform, error }: HandlerParams) => {
-    const auth = await authenticate(platform, request);
-    if (auth.status === "unauthenticated") {
-      throw error(403, "Not authenticated");
-    }
-
-    const userDO = client(request, platform.USER_DO, auth.payload.sub);
-
-    const user = await call(userDO, "details");
-
-    const items = await platform.FEED_KV.list<Post>({
-      prefix: `${user.userName}#`,
-    });
-
-    const posts = items.keys
-      .map((k) => k.metadata)
-      .filter((p): p is Post => p !== undefined);
-
-    return { feed: posts, user };
+export const loader = loader$(async ({ request, platform }: HandlerParams) => {
+  const auth = await authenticate(platform, request);
+  if (auth.status === "unauthenticated") {
+    return { feed: [], user: undefined };
   }
-);
+
+  const userDO = client(request, platform.USER_DO, auth.payload.sub);
+
+  const user = await call(userDO, "details");
+
+  const items = await platform.FEED_KV.list<Post>({
+    prefix: `${user.userName}#`,
+  });
+
+  const posts = items.keys
+    .map((k) => k.metadata)
+    .filter((p): p is Post => p !== undefined);
+
+  return { feed: posts, user };
+});
 
 export const action = action$(
   // @ts-ignore Types aren't good for action$ yet
@@ -115,8 +115,6 @@ export const action = action$(
       const postDO = client(request, platform.POST_DO, id);
       const crowdDO = client(request, platform.CROWD_DO, user.userName);
       const timelineDO = client(request, platform.TIMELINE_DO, user.userName);
-
-      console.log(crowdDO.stub.id.name);
 
       const post = await call(postDO, "write", user, text);
       call(crowdDO, "deliver", post);
