@@ -11,7 +11,7 @@ export const authenticate = (
 
   if (env.AUTH_DEV) {
     return authenticator({
-      ...request,
+      url: request.url,
       headers: new Headers({ "Cf-Access-Jwt-Assertion": env.AUTH_DEV }),
     });
   }

@@ -25,13 +25,13 @@
   },
   "devDependencies": {
     "@builder.io/qwik": "0.16.2",
-    "@builder.io/qwik-city": "0.1.0-beta8",
+    "@builder.io/qwik-city": "0.1.0-beta9",
     "@cloudflare/workers-types": "^4.20221111.1",
     "@tailwindcss/typography": "^0.5.8",
     "@types/eslint": "8.4.10",
     "@types/node": "^18.11.18",
-    "@typescript-eslint/eslint-plugin": "5.48.0",
-    "@typescript-eslint/parser": "5.48.0",
+    "@typescript-eslint/eslint-plugin": "5.48.1",
+    "@typescript-eslint/parser": "5.48.1",
     "autoprefixer": "^10.4.13",
     "cloudflare-access": "workspace:^1.0.0",
     "doit": "workspace:^1.0.0",
@@ -57,7 +57,7 @@
     "vite-plugin-qwik-worker-proxy": "workspace:^1.0.0",
     "vite-tsconfig-paths": "^4.0.3",
     "web-streams-polyfill": "^3.2.1",
-    "wrangler": "^2.6.2",
+    "wrangler": "^2.7.0",
     "wtypes": "workspace:^1.0.0"
   }
 }
